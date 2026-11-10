@@ -1,5 +1,7 @@
 # OpenCode Dev Container
 
+[![CI](https://github.com/ManuelFlorez/opencode-dev-container/actions/workflows/ci.yml/badge.svg)](https://github.com/ManuelFlorez/opencode-dev-container/actions/workflows/ci.yml)
+
 [English](README_en.md) | Español | [Inicio](../README.md)
 
 Imagen Docker que prepara un entorno de desarrollo listo para usar con
@@ -16,6 +18,7 @@ un contenedor aislado y reproducible.
 - **Node.js** `26.13.0` (base `node:26.13.0-bookworm`).
 - **GitHub CLI** (`gh`), instalado desde el repositorio oficial.
 - **OpenCode CLI** (`opencode`), instalado globalmente vía npm.
+- **jq**, **ripgrep**, **fzf**, **tmux** y **vim** para el trabajo diario.
 - Directorio de trabajo: `/app`.
 - Shell por defecto: `bash`.
 
@@ -44,10 +47,22 @@ GH_TOKEN="tu_token_de_github_aqui"
 docker build -t opencode-dev .
 ```
 
+O, usando el Makefile:
+
+```bash
+make build
+```
+
 ### 2. Ejecutar el contenedor
 
 ```bash
 docker run -it --rm --env-file .env -v "${PWD}:/app" opencode-dev
+```
+
+O:
+
+```bash
+make run
 ```
 
 Esto abre una shell `bash` dentro del contenedor, con:
@@ -74,6 +89,17 @@ gh auth status
 ```bash
 opencode
 ```
+
+## Makefile
+
+Ejecuta `make help` para listar los objetivos disponibles:
+
+| Objetivo | Descripción |
+| --- | --- |
+| `make build` | Construye la imagen Docker. |
+| `make run` | Ejecuta el contenedor con `.env` y el directorio actual montado. |
+| `make check` | Valida los archivos necesarios y que `.env` no esté versionado. |
+| `make clean` | Elimina la imagen Docker. |
 
 ## Notas de seguridad
 

@@ -7,6 +7,11 @@ RUN apt-get update \
         curl \
         ca-certificates \
         gnupg \
+        jq \
+        ripgrep \
+        fzf \
+        tmux \
+        vim \
     && mkdir -p -m 755 /etc/apt/keyrings \
     && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \

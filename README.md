@@ -1,5 +1,7 @@
 # OpenCode Dev Container
 
+[![CI](https://github.com/ManuelFlorez/opencode-dev-container/actions/workflows/ci.yml/badge.svg)](https://github.com/ManuelFlorez/opencode-dev-container/actions/workflows/ci.yml)
+
 English | [Español](docs/README_es.md)
 
 Docker image that prepares a ready-to-use development environment with
@@ -16,6 +18,7 @@ isolated, reproducible container.
 - **Node.js** `26.13.0` (base `node:26.13.0-bookworm`).
 - **GitHub CLI** (`gh`), installed from the official repository.
 - **OpenCode CLI** (`opencode`), installed globally via npm.
+- **jq**, **ripgrep**, **fzf**, **tmux** and **vim** for everyday development.
 - Working directory: `/app`.
 - Default shell: `bash`.
 
@@ -44,10 +47,22 @@ GH_TOKEN="your_github_token_here"
 docker build -t opencode-dev .
 ```
 
+Or, using the Makefile:
+
+```bash
+make build
+```
+
 ### 2. Run the container
 
 ```bash
 docker run -it --rm --env-file .env -v "${PWD}:/app" opencode-dev
+```
+
+Or:
+
+```bash
+make run
 ```
 
 This opens a `bash` shell inside the container with:
@@ -74,6 +89,17 @@ gh auth status
 ```bash
 opencode
 ```
+
+## Makefile
+
+Run `make help` to list the available targets:
+
+| Target | Description |
+| --- | --- |
+| `make build` | Build the Docker image. |
+| `make run` | Run the container with `.env` and the current directory mounted. |
+| `make check` | Validate required files and that `.env` is not tracked by git. |
+| `make clean` | Remove the Docker image. |
 
 ## Security notes
 

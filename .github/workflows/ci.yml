@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t opencode-dev .
+
+  guard:
+    name: Guard secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure .env is not tracked
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "::error::A .env file is tracked in the repository."
+            exit 1
+          fi
+          echo "OK: no .env file is tracked."
