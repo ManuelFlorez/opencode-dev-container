@@ -41,6 +41,13 @@ GH_TOKEN="your_github_token_here"
 
 ## Usage
 
+You can build the image locally or use the version published to the GitHub
+Container Registry (GHCR):
+
+```bash
+docker pull ghcr.io/manuelflorez/opencode-dev-container:latest
+```
+
 ### 1. Build the image
 
 ```bash
@@ -101,10 +108,35 @@ Run `make help` to list the available targets:
 | `make check` | Validate required files and that `.env` is not tracked by git. |
 | `make clean` | Remove the Docker image. |
 
+## SSH keys (optional)
+
+To let `git` and `gh` use your SSH keys inside the container, mount `~/.ssh`
+read-only:
+
+```bash
+docker run -it --rm --env-file .env \
+  -v "${PWD}:/app" \
+  -v "$HOME/.ssh:/root/.ssh:ro" \
+  opencode-dev
+```
+
+If your keys are passphrase-protected, forward your SSH agent instead:
+
+```bash
+docker run -it --rm --env-file .env \
+  -v "${PWD}:/app" \
+  -v "$SSH_AUTH_SOCK:/ssh-agent" \
+  -e SSH_AUTH_SOCK=/ssh-agent \
+  opencode-dev
+```
+
+Make sure the mounted keys have restrictive permissions (`chmod 600`).
+
 ## Security notes
 
 - **Do not commit** the `.env` file with real keys to a public repository. It is
   already listed in `.gitignore`; share `.env.example` with example values instead.
+- CI runs **gitleaks** to detect secrets in the repository history.
 - Rotate any token you may have exposed by mistake.
 - Use GitHub tokens with the minimum required permissions.
 
@@ -113,3 +145,7 @@ Run `make help` to list the available targets:
 - [English documentation](README_en.md)
 - [Documentación en español](README_es.md)
 - [Project README](../README.md)
+
+## License
+
+Released under the [MIT License](../LICENSE).
