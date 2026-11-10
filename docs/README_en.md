@@ -42,9 +42,11 @@ GH_TOKEN="your_github_token_here"
 ## Usage
 
 You can build the image locally or use the version published to the GitHub
-Container Registry (GHCR):
+Container Registry (GHCR). The package is private, so sign in first with a token
+that has the `read:packages` scope:
 
 ```bash
+echo "$GH_TOKEN" | docker login ghcr.io -u <your-github-user> --password-stdin
 docker pull ghcr.io/manuelflorez/opencode-dev-container:latest
 ```
 
