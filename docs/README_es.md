@@ -132,6 +132,95 @@ docker run -it --rm --env-file .env \
 
 Asegúrate de que las llaves montadas tengan permisos restrictivos (`chmod 600`).
 
+## Windows PowerShell (opcional)
+
+En Windows 11 puedes añadir funciones a tu perfil de PowerShell para que, al
+escribir `opencode` en cualquier carpeta, se ejecute OpenCode dentro de la
+imagen publicada, con esa carpeta montada en `/app`. El script completo está en
+[`scripts/opencode-dev-profile.ps1`](../scripts/opencode-dev-profile.ps1) y también está disponible como
+[gist](https://gist.github.com/ManuelFlorez/f78609b4293ed09bc16798fff19b764d).
+
+### 1. Permitir que se ejecute el perfil
+
+PowerShell bloquea por defecto los scripts `.ps1`, incluido tu perfil. Permite
+los scripts locales para tu usuario (no requiere administrador):
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Si `Get-ExecutionPolicy -List` muestra un valor distinto de `Undefined` en
+`MachinePolicy` o `UserPolicy`, la política está impuesta por Group Policy y
+debe cambiarla tu equipo de TI.
+
+### 2. Añadir las funciones al perfil
+
+```powershell
+if (!(Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force }
+notepad $PROFILE
+```
+
+Pega lo siguiente, guarda y recarga con `. $PROFILE`:
+
+```powershell
+$OpenCodeImage   = "ghcr.io/manuelflorez/opencode-dev-container:1.0.0"
+$OpenCodeEnvFile = "$HOME\.opencode-dev\.env"
+
+function Invoke-OpenCodeContainer {
+    $dockerArgs = @(
+        "run", "-it", "--rm",
+        "-v", "$((Get-Location).Path):/app",
+        "-w", "/app"
+    )
+    if (Test-Path $OpenCodeEnvFile) { $dockerArgs += @("--env-file", $OpenCodeEnvFile) }
+
+    docker @dockerArgs $OpenCodeImage @args
+}
+
+function opencode       { Invoke-OpenCodeContainer opencode @args }
+function opencode-shell { Invoke-OpenCodeContainer bash }
+```
+
+### 3. Crear el archivo de entorno (opcional)
+
+Las funciones cargan `$HOME\.opencode-dev\.env` si existe; está fuera de tus
+proyectos para que nunca se suba por accidente:
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.opencode-dev" | Out-Null
+New-Item -ItemType File -Force "$HOME\.opencode-dev\.env" | Out-Null
+notepad "$HOME\.opencode-dev\.env"
+```
+
+Añade tus claves **sin comillas** (`docker --env-file` conserva las comillas
+como parte del valor):
+
+```
+OPENAI_API_KEY=tu_api_key_de_openai
+GH_TOKEN=ghp_tu_token
+```
+
+Evita `echo ... >` u `Out-File` en Windows PowerShell 5.1: escriben en UTF-16
+o con BOM, lo que rompe la primera variable. El Bloc de notas de Windows 11
+guarda en UTF-8 sin BOM.
+
+### 4. Uso
+
+```powershell
+cd C:\ruta\a\tu\proyecto
+opencode               # OpenCode en la carpeta actual
+opencode --version     # los argumentos se pasan a opencode
+opencode-shell         # bash dentro del contenedor
+```
+
+Notas:
+
+- Docker Desktop debe estar en ejecución (backend WSL2).
+- Estas funciones tienen prioridad sobre una instalación nativa de `opencode`
+  en Windows; renómbralas (por ejemplo `opencode-docker`) si tienes ambas.
+- Para actualizar, cambia el tag de la imagen en `$OpenCodeImage` y ejecuta
+  `docker pull` con el nuevo tag.
+
 ## Notas de seguridad
 
 - **No subas** el archivo `.env` con claves reales a un repositorio público.
