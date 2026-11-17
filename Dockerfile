@@ -1,5 +1,5 @@
 
-FROM node:26.13.0-bookworm
+FROM node:26.13.1-bookworm
 
 # Install dependencies and configure GitHub CLI repository
 RUN apt-get update \
